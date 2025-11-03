@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>🦆 kFak-tour's</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background-color: #f4f4f4; text-align: center; }
+    h1 { margin-bottom: 2rem; }
+    .drop-area { border: 3px dashed #aaa; border-radius: 12px; padding: 3rem 2rem; width: 80%;
+      background: white; color: #333; transition: all 0.2s ease; cursor: pointer; user-select: none;
+      box-sizing: border-box; margin: 0 auto; max-width: 800px; }
+    .drop-area.dragover { background-color: #eef; border-color: #36f; }
+    #file-name { margin-top: 1rem; font-weight: bold; }
+    #uploadBtn { margin: 1.5rem auto; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;
+      border-radius: 6px; border: 1px solid #36f; background-color: #48f; color: white;
+      transition: background-color 0.2s ease; display: block; max-width: 200px; user-select: none; }
+    #uploadBtn:disabled { background-color: #ccc; border-color: #999; cursor: not-allowed; }
+    #uploadBtn:not(:disabled):hover { background-color: #3570d8; }
+    #fileElem { display: none; pointer-events: none; }
+    #status-text { margin-top: 1rem; font-weight: bold; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1>🦆 kFak-tour's</h1>
+
+  <div id="drop-area" class="drop-area" tabindex="0">
+    <p><strong>Cóż ci mogę?</strong></p>
+    <p>Upuść PDF tutaj lub kliknij</p>
+    <input type="file" id="fileElem" accept="application/pdf" multiple />
+    <p id="file-name"></p>
+  </div>
+
+  <button id="uploadBtn" type="button" disabled> kFak-tour</button>
+  <div id="status-text"></div>
+
+  <script>
+    // POPRAWKA: trailing slash ważny dla Nginx proxy
+    const BACKEND_URL = "http://vps15151.awhost.cloud:3012/Fakturownica/api/";
+
+    const dropArea = document.getElementById("drop-area");
+    const fileElem = document.getElementById("fileElem");
+    const fileNameDisplay = document.getElementById("file-name");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const statusText = document.getElementById("status-text");
+
+    dropArea.addEventListener("click", () => fileElem.click());
+    fileElem.addEventListener("change", handleFiles);
+    ["dragenter","dragover"].forEach(evt =>
+      dropArea.addEventListener(evt, e => { e.preventDefault(); dropArea.classList.add("dragover"); })
+    );
+    ["dragleave","drop"].forEach(evt =>
+      dropArea.addEventListener(evt, e => { e.preventDefault(); dropArea.classList.remove("dragover"); })
+    );
+    dropArea.addEventListener("drop", e => handleFiles({ target: { files: e.dataTransfer.files }}));
+    window.addEventListener("dragover", e => e.preventDefault());
+    window.addEventListener("drop", e => e.preventDefault());
+
+    let selectedFiles = [];
+
+    function handleFiles(e) {
+      const files = Array.from(e.target.files);
+      selectedFiles = [];
+      fileNameDisplay.textContent = "";
+
+      for (let f of files) {
+        if (f.type !== "application/pdf") {
+          fileNameDisplay.textContent = "❌ Wszystkie pliki muszą być PDF!";
+          uploadBtn.disabled = true;
+          return;
+        }
+        selectedFiles.push(f);
+      }
+
+      if (selectedFiles.length) {
+        fileNameDisplay.textContent = `📄 Wybrano ${selectedFiles.length} plik(ów)`;
+        uploadBtn.disabled = false;
+      } else {
+        fileNameDisplay.textContent = "❌ Wybierz pliki PDF";
+        uploadBtn.disabled = true;
+      }
+    }
+
+    uploadBtn.addEventListener("click", async () => {
+      if (!selectedFiles.length) return;
+      uploadBtn.disabled = true;
+      statusText.textContent = "⏳ Wysyłam pliki…";
+
+      const formData = new FormData();
+      selectedFiles.forEach(f => formData.append("files", f));
+
+      try {
+        const res = await fetch(`${BACKEND_URL}upload`, {
+          method: "POST",
+          body: formData // NIE ustawiaj Content-Type ręcznie!
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        statusText.textContent = `✅ Przesłano, ID zadania: ${data.jobId}. Automatyzacja trwa w tle.`;
+      } catch (err) {
+        statusText.textContent = `❌ Błąd: ${err.message}`;
+      } finally {
+        selectedFiles = [];
+        fileElem.value = "";
+        fileNameDisplay.textContent = "";
+        uploadBtn.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>

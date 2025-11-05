@@ -1,218 +1,219 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>🦆 kFak-tour's</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; background-color: #f4f4f4; text-align: center; }
-    h1 { margin-bottom: 2rem; }
-    .drop-area { border: 3px dashed #aaa; border-radius: 12px; padding: 3rem 2rem; width: 80%;
-      background: white; color: #333; transition: all 0.2s ease; cursor: pointer; user-select: none;
-      box-sizing: border-box; margin: 0 auto; max-width: 800px; }
-    .drop-area.dragover { background-color: #eef; border-color: #36f; }
-    #file-name { margin-top: 1rem; font-weight: bold; }
-    #uploadBtn { margin: 1.5rem auto; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;
-      border-radius: 6px; border: 1px solid #36f; background-color: #48f; color: white;
-      transition: background-color 0.2s ease; display: block; max-width: 200px; user-select: none; }
-    #uploadBtn:disabled { background-color: #ccc; border-color: #999; cursor: not-allowed; }
-    #uploadBtn:not(:disabled):hover { background-color: #3570d8; }
-    #fileElem { display: none; }
-    #status-text { margin-top: 1rem; font-weight: bold; font-size: 1.1rem; }
-
-    /* On tour box */
-    h2 { margin-top: 2rem; }
-    #tour-box {
-      max-width: 800px;
-      margin: 1rem auto;
-      background: white;
-      border-radius: 12px;
-      padding: 1rem;
-      text-align: left;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      max-height: 320px;
-      overflow: auto;
-    }
-    .f-row { padding: 8px 6px; border-bottom: 1px solid #eee; display: flex; gap:12px; align-items:center; }
-    .f-row strong { flex: 1 1 40%; }
-    .f-row .num { color:#666; font-size:0.95rem; width:160px; text-align:right; }
-    .empty { color:#888; padding: 1rem; text-align:center; }
-    #generateXmlBtn { margin-top: 12px; padding: 0.6rem 1rem; border-radius:6px; background:#2e7d32; color:#fff; border: none; cursor:pointer;}
-    #generateXmlBtn:disabled { background:#999; cursor:not-allowed; }
-  </style>
+<meta charset="UTF-8" />
+<title>🦆 kFak-tour's</title>
+<style>
+  body { font-family: sans-serif; padding: 2rem; background-color: #f4f4f4; text-align: center; }
+  h1 { margin-bottom: 2rem; }
+  .drop-area { border: 3px dashed #aaa; border-radius: 12px; padding: 3rem 2rem; width: 80%;
+    background: white; color: #333; transition: all 0.2s ease; cursor: pointer; user-select: none;
+    box-sizing: border-box; margin: 0 auto; max-width: 800px; }
+  .drop-area.dragover { background-color: #eef; border-color: #36f; }
+  #file-name { margin-top: 1rem; font-weight: bold; }
+  #uploadBtn { margin: 1.5rem auto; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;
+    border-radius: 6px; border: 1px solid #36f; background-color: #48f; color: white;
+    transition: background-color 0.2s ease; display: block; max-width: 200px; user-select: none; }
+  #uploadBtn:not(:disabled):hover { background-color: #3570d8; }
+  #fileElem { display: none; }
+  #status-text { margin-top: 1rem; font-weight: bold; font-size: 1.1rem; }
+  h2 { margin-top: 2rem; }
+  #tour-box {
+    max-width: 800px;
+    margin: 1rem auto;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    max-height: 320px;
+    overflow: auto;
+  }
+  .f-row { padding: 8px 6px; border-bottom: 1px solid #eee; display: flex; gap:12px; align-items:center; }
+  .f-row strong { flex: 1 1 40%; }
+  .f-row .num { color:#666; font-size:0.95rem; width:160px; text-align:right; }
+  .empty { color:#888; padding: 1rem; text-align:center; }
+  #generateXmlBtn { margin-top: 12px; padding: 0.6rem 1rem; border-radius:6px; background:#2e7d32; color:#fff; border: none; cursor:pointer;}
+  #generateXmlBtn:disabled { background:#999; cursor:not-allowed; }
+  #progressBar { width: 80%; height: 16px; background: #eee; border-radius: 8px; margin: 0.5rem auto; overflow: hidden; }
+  #progressFill { width: 0%; height: 100%; background: #48f; transition: width 0.3s; }
+</style>
 </head>
 <body>
-  <h1>🦆 kFak-tour's</h1>
+<h1>🦆 kFak-tour's</h1>
 
-  <div id="drop-area" class="drop-area" tabindex="0">
-    <p><strong>Cóż ci mogę?</strong></p>
-    <p>Upuść PDF tutaj lub kliknij</p>
-    <input type="file" id="fileElem" accept="application/pdf" multiple />
-    <p id="file-name"></p>
-  </div>
+<div id="drop-area" class="drop-area" tabindex="0">
+  <p><strong>Cóż ci mogę?</strong></p>
+  <p>Upuść PDF tutaj lub kliknij</p>
+  <input type="file" id="fileElem" accept="application/pdf" multiple />
+  <p id="file-name"></p>
+</div>
 
-  <button id="uploadBtn" type="button" disabled> kFak-tour</button>
-  <div id="status-text"></div>
+<button id="uploadBtn" type="button" disabled>kFak-tour</button>
+<div id="status-text"></div>
+<div id="progressBar"><div id="progressFill"></div></div>
 
-  <h2>🚌 On Tour...</h2>
-  <div id="tour-box">
-    <div class="empty">Ładowanie listy faktur...</div>
-  </div>
-  <button id="generateXmlBtn" type="button">🎯 Zakończ Tour i Generuj XML</button>
+<h2>🚌 On Tour...</h2>
+<div id="tour-box"><div class="empty">Ładowanie listy faktur...</div></div>
+<button id="generateXmlBtn" type="button">🎯 Zakończ Tour i Generuj XML</button>
 
-  <script>
-    // Używamy RELATYWNEGO BACKEND_URL - ważne ze względu na Nginx proxy i certyfikaty
-    const BACKEND_URL = "/Fakturownica/api/";
+<script>
+const BACKEND_URL = "/Fakturownica/api/";
+const dropArea = document.getElementById("drop-area");
+const fileElem = document.getElementById("fileElem");
+const fileNameDisplay = document.getElementById("file-name");
+const uploadBtn = document.getElementById("uploadBtn");
+const statusText = document.getElementById("status-text");
+const tourBox = document.getElementById('tour-box');
+const generateXmlBtn = document.getElementById('generateXmlBtn');
+const progressFill = document.getElementById('progressFill');
 
-    const dropArea = document.getElementById("drop-area");
-    const fileElem = document.getElementById("fileElem");
-    const fileNameDisplay = document.getElementById("file-name");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const statusText = document.getElementById("status-text");
-    const tourBox = document.getElementById('tour-box');
-    const generateXmlBtn = document.getElementById('generateXmlBtn');
+let queueFiles = [];
+let jobId = null;
+let pollInterval = null;
 
-    // Kliknięcie otwiera dialog - OK
-    dropArea.addEventListener("click", (e) => {
-      // jeśli event to było drop (czyli e.dataTransfer istnieje) - nie wywołujemy click
-      if (e.isTrusted) fileElem.click();
-    });
+// Drag & drop
+["dragenter","dragover"].forEach(evt =>
+  dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.add("dragover"); })
+);
+["dragleave","drop"].forEach(evt =>
+  dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.remove("dragover"); })
+);
+dropArea.addEventListener("drop", (e) => {
+  const files = e.dataTransfer?.files;
+  if (files) handleFiles({ target: { files } });
+});
+dropArea.addEventListener("click", () => fileElem.click());
+fileElem.addEventListener("change", handleFiles);
 
-    // Zabezpieczenia drag/drop
-    ["dragenter","dragover"].forEach(evt =>
-      dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.add("dragover"); })
-    );
-    ["dragleave","drop"].forEach(evt =>
-      dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.remove("dragover"); })
-    );
-
-    // drop obsługa: nie wywołuj click(), tylko bezpośrednio obsłuż pliki
-    dropArea.addEventListener("drop", (e) => {
-      const files = e.dataTransfer?.files;
-      if (files) handleFiles({ target: { files } });
-    });
-
-    // Obsługa wybierania plików via dialog
-    fileElem.addEventListener("change", handleFiles);
-
-    // Uniwersalna funkcja obsługi listy plików
-    let selectedFiles = [];
-    function handleFiles(e) {
-      const files = Array.from(e.target.files || []);
-      selectedFiles = [];
-      fileNameDisplay.textContent = "";
-
-      for (let f of files) {
-        if (f.type !== "application/pdf") {
-          fileNameDisplay.textContent = "❌ Wszystkie pliki muszą być PDF!";
-          uploadBtn.disabled = true;
-          return;
-        }
-        selectedFiles.push(f);
-      }
-
-      if (selectedFiles.length) {
-        fileNameDisplay.textContent = `📄 Wybrano ${selectedFiles.length} plik(ów)`;
-        uploadBtn.disabled = false;
-      } else {
-        fileNameDisplay.textContent = "❌ Wybierz pliki PDF";
-        uploadBtn.disabled = true;
-      }
+function handleFiles(e){
+  const files = Array.from(e.target.files || []);
+  for(let f of files){
+    if(f.type!=='application/pdf'){
+      fileNameDisplay.textContent = "❌ Wszystkie pliki muszą być PDF!";
+      return;
     }
+    queueFiles.push(f);
+  }
+  fileNameDisplay.textContent = `📄 Wybrano ${queueFiles.length} plik(ów)`;
+  uploadBtn.disabled = queueFiles.length===0;
+}
 
-    uploadBtn.addEventListener("click", async () => {
-      if (!selectedFiles.length) return;
-      uploadBtn.disabled = true;
-      statusText.textContent = "⏳ Wysyłam pliki…";
+// --- wysyłka plików ---
+uploadBtn.addEventListener("click", async () => {
+  if(queueFiles.length===0) return;
+  uploadBtn.disabled = true;
+  statusText.textContent = "⏳ Rozpoczynam wysyłkę…";
 
-      const formData = new FormData();
-      selectedFiles.forEach(f => formData.append("files", f));
+  const formData = new FormData();
+  queueFiles.forEach(f => formData.append("files", f));
 
-      try {
-        const res = await fetch(`${BACKEND_URL}upload`, {
-          method: "POST",
-          body: formData
-        });
+  try {
+    const res = await fetch(`${BACKEND_URL}upload`, { method: "POST", body: formData });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    jobId = data.jobId;
+    statusText.textContent = `✅ Wysłano, ID zadania: ${jobId}`;
+    queueFiles = [];
+    fileElem.value = "";
+    fileNameDisplay.textContent = "";
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        statusText.textContent = `✅ Przesłano, ID zadania: ${data.jobId}. Automatyzacja trwa w tle.`;
-      } catch (err) {
-        statusText.textContent = `❌ Błąd: ${err.message}`;
-      } finally {
-        selectedFiles = [];
-        fileElem.value = "";
-        fileNameDisplay.textContent = "";
-        uploadBtn.disabled = true;
-      }
-    });
+    // start pollowania statusu
+    completedCount = 0;
+    pollInterval = setInterval(fetchJobStatus, 1000);
+  } catch(err){
+    statusText.textContent = `❌ Błąd: ${err.message}`;
+    uploadBtn.disabled = false;
+  }
+});
 
-    // --- On Tour: fetch faktury co 5s ---
-    async function fetchFaktury() {
-      try {
-        const res = await fetch(`${BACKEND_URL}faktury`);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        if (!data.length) {
-          tourBox.innerHTML = '<div class="empty">Brak faktur w bazie.</div>';
-          return;
-        }
-        tourBox.innerHTML = data.map(f => {
-          const spr = escapeHtml(f.sprzedawca || '');
-          const nab = escapeHtml(f.nabywca || '');
-          const num = escapeHtml(f.numer_faktury || '');
-          const brutto = (f.wartosc_brutto !== undefined && f.wartosc_brutto !== null) ? Number(f.wartosc_brutto).toFixed(2) : '0.00';
-          const label = spr || nab || '(brak)';
-          return `<div class="f-row">
-            <strong>${label}</strong>
-            <div style="flex:1">${num}</div>
-            <div class="num">${brutto} PLN</div>
-          </div>`;
-        }).join('');
-      } catch (err) {
-        tourBox.innerHTML = `<div class="empty">❌ Błąd: ${escapeHtml(err.message)}</div>`;
-      }
+// --- pollowanie statusu z backendu ---
+let completedCount = 0;
+async function fetchJobStatus(){
+  if(!jobId) return;
+  try {
+    const res = await fetch(`${BACKEND_URL}job-status/${jobId}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    completedCount = data.completed;
+    const pct = data.total ? Math.round((completedCount/data.total)*100) : 0;
+    progressFill.style.width = `${pct}%`;
+    statusText.textContent = `Przetworzono ${completedCount} z ${data.total} plików (${pct}%)`;
+
+    if(completedCount >= data.total){
+      clearInterval(pollInterval);
+      pollInterval = null;
+      statusText.textContent += " ✅ Wszystkie pliki przetworzone!";
     }
+  } catch(err){
+    console.error('Błąd fetchJobStatus:', err);
+  }
+}
 
-    function escapeHtml(s) {
-      if (!s && s !== 0) return '';
-      return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+// --- On Tour: fetch faktury co 5s ---
+async function fetchFaktury() {
+  try {
+    const res = await fetch(`${BACKEND_URL}faktury`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.length) {
+      tourBox.innerHTML = '<div class="empty">Brak faktur w bazie.</div>';
+      return;
     }
+    tourBox.innerHTML = data.map(f => {
+      const spr = escapeHtml(f.sprzedawca || '');
+      const nab = escapeHtml(f.nabywca || '');
+      const brutto = (f.wartosc_brutto !== undefined && f.wartosc_brutto !== null) ? Number(f.wartosc_brutto).toFixed(2) : '0.00';
+      const num = escapeHtml(f.numer_faktury || '');
+      return `<div class="f-row">
+        <strong>${spr}</strong>
+        <div>${nab}</div>
+        <div class="num">${brutto} PLN</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    tourBox.innerHTML = `<div class="empty">❌ Błąd: ${escapeHtml(err.message)}</div>`;
+  }
+}
 
-    fetchFaktury();
-    setInterval(fetchFaktury, 5000);
+function escapeHtml(s) {
+  if (!s && s !== 0) return '';
+  return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-    // Generuj XML
-    generateXmlBtn.addEventListener('click', async () => {
-      if (!confirm('Czy na pewno chcesz wygenerować XML i wyczyścić bazę?')) return;
-      generateXmlBtn.disabled = true;
-      generateXmlBtn.textContent = 'Generowanie XML...';
-      try {
-        const res = await fetch(`${BACKEND_URL}faktury/xml`);
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(`HTTP ${res.status} - ${txt}`);
-        }
-        const blob = await res.blob();
-        const filename = res.headers.get('content-disposition')?.match(/filename="?([^"]+)"?/)?.[1] || 'faktury.xml';
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+fetchFaktury();
+setInterval(fetchFaktury, 5000);
 
-        // odśwież listę (baza ma być czyszczona przez backend)
-        setTimeout(fetchFaktury, 500);
-      } catch (err) {
-        alert('Błąd generowania XML: ' + err.message);
-      } finally {
-        generateXmlBtn.disabled = false;
-        generateXmlBtn.textContent = '🎯 Zakończ Tour i Generuj XML';
-      }
-    });
+// --- Generuj XML ---
+generateXmlBtn.addEventListener('click', async () => {
+  if (!confirm('Czy na pewno chcesz wygenerować XML i wyczyścić bazę?')) return;
+  generateXmlBtn.disabled = true;
+  generateXmlBtn.textContent = 'Generowanie XML...';
+  try {
+    const res = await fetch(`${BACKEND_URL}faktury/xml`);
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status} - ${txt}`);
+    }
+    const blob = await res.blob();
+    const filename = res.headers.get('content-disposition')?.match(/filename="?([^"]+)"?/)?.[1] || 'faktury.xml';
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
 
-  </script>
+    setTimeout(fetchFaktury, 500);
+  } catch (err) {
+    alert('Błąd generowania XML: ' + err.message);
+  } finally {
+    generateXmlBtn.disabled = false;
+    generateXmlBtn.textContent = '🎯 Zakończ Tour i Generuj XML';
+  }
+});
+</script>
 </body>
 </html>

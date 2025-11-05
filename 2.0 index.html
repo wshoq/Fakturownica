@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>🦆 kFak-Tour's</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@700&family=Lobster&display=swap" rel="stylesheet">
+<style>
+body { 
+    font-family: sans-serif; 
+    padding: 2rem; 
+    text-align: center; 
+    position: relative; 
+    overflow-x: hidden;
+    color: #000; /* czarny kolor tekstu */
+}
+
+/* Tło na spodzie */
+#background {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    background: url('tlo.jpg') no-repeat right bottom;
+    background-size: contain;
+    mask-image: linear-gradient(135deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: linear-gradient(135deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+}
+
+/* Mati przyklejony do lewej krawędzi */
+#mati {
+    position: fixed;
+    top: 12%;
+    left: -5%;
+    width: 400px;
+    height: auto;
+    opacity: 1;
+    pointer-events: none;
+    transition: all 1s ease-in-out;
+    z-index: 3;
+}
+
+/* GIF dynamiczny */
+#gif {
+    position: fixed;
+    left: 10px;
+    bottom: -500px;
+    width: 400px;
+    height: auto;
+    opacity: 1;
+    pointer-events: none;
+    transition: all 2s ease-in-out;
+    z-index: 2;
+    mix-blend-mode: multiply; /* białe przezroczyste */
+    filter: contrast(1.5);
+}
+
+/* Teksty */
+h1 {
+    margin-bottom:2rem;
+    font-family: 'Pacifico', cursive;
+    font-size: 3rem;
+    color: #000; /* czarne */
+    text-shadow: none;
+}
+
+.subtitle {
+    font-family: 'Dancing Script', cursive;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #000; /* czarne */
+}
+
+h2 {
+    margin-top:2rem;
+    font-family: 'Lobster', cursive;
+    font-size: 2rem;
+    color: #000; /* czarne */
+}
+
+#status-text {
+    margin-top:1rem;
+    font-weight:bold;
+    font-size:1.1rem;
+    color: #000; /* czarne */
+}
+
+/* Drop area lekko przeźroczyste */
+.drop-area{
+    border:3px dashed #000;
+    border-radius:12px;
+    padding:3rem 2rem;
+    width: 92%;
+    background: rgba(255,255,255,0.7); /* lekko przezroczyste */
+    cursor:pointer;
+    user-select:none;
+    box-sizing:border-box;
+    margin:0 auto;
+    max-width:920px;
+    z-index: 3;
+    position: relative;
+    transition: all 0.2s ease;
+}
+.drop-area.dragover{background-color: rgba(238,238,255,0.9); border-color:#36f;}
+#file-name{margin-top:1rem;font-weight:bold;color:#000;}
+
+#uploadBtn{
+    margin:1.5rem auto;
+    padding:0.6rem 1.2rem;
+    font-size:1rem;
+    cursor:pointer;
+    border-radius:6px;
+    border:1px solid #36f;
+    background-color:#48f;
+    color:white;
+    display:block; 
+    max-width:200px;
+    z-index: 3;
+    position: relative;
+}
+#uploadBtn:not(:disabled):hover{background-color:#3570d8;}
+#fileElem{display:none;}
+
+/* Tour box */
+#tour-box{
+    max-width:920px;
+    margin:1rem auto;
+    background: rgba(255,255,255,0.7);
+    border-radius:12px;
+    padding:1rem;
+    text-align:left;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    max-height:320px;
+    overflow:auto;
+    position: relative; z-index: 3;
+}
+
+.f-row{
+    display:flex;
+    gap:12px;
+    padding:8px 6px;
+    border-bottom:1px solid #eee;
+    align-items:center;
+}
+.f-row div, .f-row strong{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.f-row strong{ flex: 2 1 40%; }
+.f-row .nabywca{ flex: 2 1 40%; }
+.f-row .num{ flex: 1 1 10%; text-align:right; color:#666; font-size:0.95rem; }
+
+.empty{color:#888;padding:1rem;text-align:center;}
+#generateXmlBtn{margin-top:12px;padding:0.6rem 1rem;border-radius:6px;background:#2e7d32;color:#fff;border:none;cursor:pointer; z-index:3;}
+#generateXmlBtn:disabled{background:#999;cursor:not-allowed;}
+
+/* Pasek postępu krótszy i z konturami */
+#progressBar{
+    width:46%; /* połowa szerokości */
+    height:16px;
+    background:#eee;
+    border:1px solid #333; /* kontur */
+    border-radius:8px;
+    margin:0.5rem auto;
+    overflow:hidden;
+}
+#progressFill{width:0%;height:100%;background:#48f;transition:width 0.3s;}
+</style>
+</head>
+<body>
+<img id="background" src="tlo.jpg" alt="tło">
+<img id="mati" src="mati.png" alt="mati">
+<img id="gif" src="1.gif" alt="gif">
+
+<h1>🦆 kFak-Tour's 🌴</h1>
+<div class="subtitle">Tędy proszę</div>
+
+<div id="drop-area" class="drop-area" tabindex="0">
+  <p>Upuść PDF tutaj lub kliknij</p>
+  <input type="file" id="fileElem" accept="application/pdf" multiple />
+  <p id="file-name"></p>
+</div>
+<button id="uploadBtn" type="button" disabled>kFak-tour</button>
+<div id="status-text"></div>
+<div id="progressBar"><div id="progressFill"></div></div>
+
+<h2>🚌 On Tour...</h2>
+<div id="tour-box"><div class="empty">Ładowanie listy faktur...</div></div>
+<button id="generateXmlBtn" type="button">🎯 Zakończ Tour i Generuj XML</button>
+
+<script>
+const BACKEND_URL = "/Fakturownica/api/";
+const dropArea = document.getElementById("drop-area");
+const fileElem = document.getElementById("fileElem");
+const fileNameDisplay = document.getElementById("file-name");
+const uploadBtn = document.getElementById("uploadBtn");
+const statusText = document.getElementById("status-text");
+const tourBox = document.getElementById('tour-box');
+const generateXmlBtn = document.getElementById('generateXmlBtn');
+const progressFill = document.getElementById('progressFill');
+
+const mati = document.getElementById("mati");
+const gif = document.getElementById("gif");
+
+let queueFiles = [];
+let jobId = null;
+let pollInterval = null;
+
+// Drag & Drop
+["dragenter","dragover"].forEach(evt=>dropArea.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropArea.classList.add("dragover");}));
+["dragleave","drop"].forEach(evt=>dropArea.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropArea.classList.remove("dragover");}));
+dropArea.addEventListener("drop",e=>handleFiles({target:{files:e.dataTransfer.files}}));
+dropArea.addEventListener("click",()=>fileElem.click());
+fileElem.addEventListener("change",handleFiles);
+
+function handleFiles(e){
+  const files = Array.from(e.target.files||[]);
+  for(let f of files){
+    if(f.type!=='application/pdf'){fileNameDisplay.textContent="❌ Wszystkie pliki muszą być PDF!";return;}
+    queueFiles.push(f);
+  }
+  fileNameDisplay.textContent=`📄 Wybrano ${queueFiles.length} plik(ów)`;
+  uploadBtn.disabled = queueFiles.length===0;
+}
+
+// Animacja Mati -> GIF
+uploadBtn.addEventListener("click", async ()=>{
+  if(queueFiles.length===0) return;
+
+  // Mati wyjeżdża w lewo
+  mati.style.left = '-500px';
+  mati.style.opacity = '0';
+
+  // GIF dojeżdża do góry, wyjeżdża 20% ponad ekran
+  const dropRect = dropArea.getBoundingClientRect();
+  const maxWidth = dropRect.left - 20;
+  gif.style.width = Math.min(400, maxWidth) + 'px';
+  const topOffset = window.innerHeight * 0.2;
+  setTimeout(()=>{
+    gif.style.bottom = (window.innerHeight - topOffset - gif.offsetHeight) + 'px';
+  }, 1000);
+
+  uploadBtn.disabled=true;
+  statusText.textContent="⏳ Rozpoczynam wysyłkę…";
+
+  const formData=new FormData();
+  queueFiles.forEach(f=>formData.append("files",f));
+  try{
+    const res = await fetch(`${BACKEND_URL}upload`,{method:"POST",body:formData});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    jobId = data.jobId;
+    statusText.textContent=`✅ Wysłano, ID zadania: ${jobId}`;
+    queueFiles = [];
+    fileElem.value = "";
+    fileNameDisplay.textContent = "";
+    progressFill.style.width="0%";
+    pollInterval=setInterval(fetchJobStatus,1000);
+  }catch(err){
+    statusText.textContent=`❌ Błąd: ${err.message}`;
+    uploadBtn.disabled=false;
+  }
+});
+
+// Polling job status
+let completedCount=0;
+async function fetchJobStatus(){
+  if(!jobId) return;
+  try{
+    const res = await fetch(`${BACKEND_URL}job-status/${jobId}`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    completedCount=data.completed;
+    const pct = data.total ? Math.round((completedCount/data.total)*100) : 0;
+    progressFill.style.width=`${pct}%`;
+    statusText.textContent=`Przetworzono ${completedCount} z ${data.total} plików (${pct}%)`;
+    if(completedCount>=data.total){
+      clearInterval(pollInterval);
+      pollInterval=null;
+      statusText.textContent+=" ✅ Wszystkie pliki przetworzone!";
+    }
+  }catch(err){ console.error('Błąd fetchJobStatus:',err); }
+}
+
+// Fetch faktury
+async function fetchFaktury(){
+  try{
+    const res = await fetch(`${BACKEND_URL}faktury`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    if(!data.length){tourBox.innerHTML='<div class="empty">Brak faktur w bazie.</div>';return;}
+    tourBox.innerHTML = data.map(f=>{
+      const spr = escapeHtml(f.sprzedawca||'');
+      const nab = escapeHtml(f.nabywca||'');
+      const brutto = (f.wartosc_brutto!==undefined && f.wartosc_brutto!==null)?Number(f.wartosc_brutto).toFixed(2):'0.00';
+      return `<div class="f-row">
+        <strong>${spr}</strong>
+        <div class="nabywca">${nab}</div>
+        <div class="num">${brutto} PLN</div>
+      </div>`;
+    }).join('');
+  }catch(err){tourBox.innerHTML=`<div class="empty">❌ Błąd: ${escapeHtml(err.message)}</div>`;}
+}
+function escapeHtml(s){ if(!s&&s!==0) return''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+fetchFaktury();
+setInterval(fetchFaktury,5000);
+
+// XML
+generateXmlBtn.addEventListener('click',async()=>{
+  if(!confirm('Czy na pewno chcesz wygenerować XML i wyczyścić bazę?')) return;
+  generateXmlBtn.disabled=true;
+  generateXmlBtn.textContent='Generowanie XML...';
+  try{
+    const res = await fetch(`${BACKEND_URL}faktury/xml`);
+    if(!res.ok){const txt=await res.text();throw new Error(`HTTP ${res.status} - ${txt}`);}
+    const blob = await res.blob();
+    const filename = res.headers.get('content-disposition')?.match(/filename="?([^"]+)"?/)?.[1] || 'faktury.xml';
+    const url = window.URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();window.URL.revokeObjectURL(url);
+    setTimeout(fetchFaktury,500);
+  }catch(err){alert('Błąd generowania XML: '+err.message);}
+  finally{generateXmlBtn.disabled=false;generateXmlBtn.textContent='🎯 Zakończ Tour i Generuj XML';}
+});
+</script>
+</body>
+</html>

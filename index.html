@@ -2,49 +2,181 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8" />
-<title>🦆 kFak-tour's</title>
+<title>🦆 kFak-Tour's</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@700&family=Lobster&display=swap" rel="stylesheet">
 <style>
-  body { font-family: sans-serif; padding: 2rem; background-color: #f4f4f4; text-align: center; }
-  h1 { margin-bottom: 2rem; }
-  .drop-area { border: 3px dashed #aaa; border-radius: 12px; padding: 3rem 2rem; width: 80%;
-    background: white; color: #333; transition: all 0.2s ease; cursor: pointer; user-select: none;
-    box-sizing: border-box; margin: 0 auto; max-width: 800px; }
-  .drop-area.dragover { background-color: #eef; border-color: #36f; }
-  #file-name { margin-top: 1rem; font-weight: bold; }
-  #uploadBtn { margin: 1.5rem auto; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;
-    border-radius: 6px; border: 1px solid #36f; background-color: #48f; color: white;
-    transition: background-color 0.2s ease; display: block; max-width: 200px; user-select: none; }
-  #uploadBtn:not(:disabled):hover { background-color: #3570d8; }
-  #fileElem { display: none; }
-  #status-text { margin-top: 1rem; font-weight: bold; font-size: 1.1rem; }
-  h2 { margin-top: 2rem; }
-  #tour-box {
-    max-width: 800px;
-    margin: 1rem auto;
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: left;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    max-height: 320px;
-    overflow: auto;
-  }
-  .f-row { padding: 8px 6px; border-bottom: 1px solid #eee; display: flex; gap:12px; align-items:center; }
-  .f-row strong { flex: 1 1 40%; }
-  .f-row .num { color:#666; font-size:0.95rem; width:160px; text-align:right; }
-  .empty { color:#888; padding: 1rem; text-align:center; }
-  #generateXmlBtn { margin-top: 12px; padding: 0.6rem 1rem; border-radius:6px; background:#2e7d32; color:#fff; border: none; cursor:pointer;}
-  #generateXmlBtn:disabled { background:#999; cursor:not-allowed; }
-  #progressBar { width: 80%; height: 16px; background: #eee; border-radius: 8px; margin: 0.5rem auto; overflow: hidden; }
-  #progressFill { width: 0%; height: 100%; background: #48f; transition: width 0.3s; }
+body { 
+    font-family: sans-serif; 
+    padding: 2rem; 
+    text-align: center; 
+    position: relative; 
+    overflow-x: hidden;
+    color: #000;
+    background:#f4f4f4;
+}
+#background {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    background: url('tlo.jpg') no-repeat right bottom;
+    background-size: contain;
+}
+#mati {
+    position: fixed;
+    top: 12%;
+    left: -5%;
+    width: 400px;
+    height: auto;
+    opacity: 1;
+    pointer-events: none;
+    transition: all 1s ease-in-out;
+    z-index: 3;
+}
+#gif {
+    position: fixed;
+    left: 10px;
+    bottom: -500px;
+    width: 400px;
+    height: auto;
+    opacity: 1;
+    pointer-events: none;
+    transition: all 2s ease-in-out;
+    z-index: 2;
+    mix-blend-mode: multiply;
+    filter: contrast(1.5);
+}
+h1 { 
+    margin-bottom:2rem;
+    font-family: 'Pacifico', cursive;
+    font-size: 3rem;
+    color: #000;
+}
+.subtitle {
+    font-family: 'Dancing Script', cursive;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #000;
+}
+h2 {
+    margin-top:2rem;
+    font-family: 'Lobster', cursive;
+    font-size: 2rem;
+    color: #000;
+}
+#status-text {
+    margin-top:1rem;
+    font-weight:bold;
+    font-size:1.1rem;
+    color: #000;
+}
+.drop-area{
+    border:3px dashed #fff;
+    border-radius:12px;
+    padding:3rem 2rem;
+    width: 92%;
+    background: rgba(0,0,0,0.85);
+    color:#fff;
+    font-size:1.3rem;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+    box-sizing:border-box;
+    margin:0 auto;
+    max-width:920px;
+    z-index: 3;
+    position: relative;
+    transition: all 0.2s ease;
+}
+.drop-area.dragover{background-color: rgba(50,50,50,0.9); border-color:#36f;}
+#file-name{margin-top:1rem;font-weight:bold;color:#fff;}
+#uploadBtn{
+    margin:1.5rem auto;
+    padding:0.6rem 1.2rem;
+    font-size:1rem;
+    cursor:pointer;
+    border-radius:6px;
+    border:1px solid #36f;
+    background-color:#48f;
+    color:white;
+    display:block; 
+    max-width:200px;
+    z-index: 3;
+    position: relative;
+}
+#uploadBtn:not(:disabled):hover{background-color:#3570d8;}
+#fileElem{display:none;}
+#tour-box{
+    max-width:920px;
+    margin:1rem auto;
+    background: rgba(0,0,0,0.85);
+    border-radius:12px;
+    padding:1rem;
+    text-align:left;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    max-height:320px;
+    overflow:auto;
+    position: relative; 
+    z-index: 3;
+    color:#fff;
+    font-size:0.95rem;
+}
+#tour-box .f-header{
+    display:flex;
+    gap:12px;
+    padding:6px;
+    font-weight:bold;
+    border-bottom:1px solid #fff;
+}
+.f-row{
+    display:flex;
+    gap:12px;
+    padding:6px;
+    border-bottom:1px solid #333;
+    align-items:center;
+}
+.f-row strong{ flex: 2 1 40%; }
+.f-row .nabywca{ flex: 2 1 40%; }
+.f-row .num{ flex: 1 1 10%; text-align:right; color:#fff; }
+.empty{color:#ccc;padding:1rem;text-align:center;}
+#progressBar{
+    width:46%;
+    height:16px;
+    background:#eee;
+    border:1px solid #333;
+    border-radius:8px;
+    margin:0.5rem auto;
+    overflow:hidden;
+}
+#progressFill{width:0%;height:100%;background:#48f;transition:width 0.3s;}
+#fullTourBtn {
+    margin-left: 1rem;
+    padding:0.6rem 1rem;
+    border-radius:6px;
+    background:#222;
+    color:#fff;
+    border:1px solid #555;
+    cursor:pointer;
+}
+#fullTourBtn:hover{background:#333;}
 </style>
 </head>
 <body>
-<h1>🦆 kFak-tour's</h1>
+<img id="background" src="tlo.jpg" alt="tło">
+<img id="mati" src="mati.png" alt="mati">
+<img id="gif" src="1.gif" alt="gif">
 
-<div id="drop-area" class="drop-area" tabindex="0">
-  <p><strong>Cóż ci mogę?</strong></p>
-  <p>Upuść PDF tutaj lub kliknij</p>
+<h1>🦆 kFak-Tour's 🌴</h1>
+<div class="subtitle">Tędy proszę</div>
+
+<div id="drop-area" class="drop-area">
+  <p>Upuść PDF tutaj lub kliknij, aby wybrać</p>
   <input type="file" id="fileElem" accept="application/pdf" multiple />
   <p id="file-name"></p>
 </div>
@@ -54,8 +186,19 @@
 <div id="progressBar"><div id="progressFill"></div></div>
 
 <h2>🚌 On Tour...</h2>
-<div id="tour-box"><div class="empty">Ładowanie listy faktur...</div></div>
-<button id="generateXmlBtn" type="button">🎯 Zakończ Tour i Generuj XML</button>
+<div id="tour-box">
+    <div class="f-header">
+        <div style="flex:2">Sprzedawca</div>
+        <div style="flex:2">Nabywca</div>
+        <div style="flex:1">Wart. brutto</div>
+    </div>
+    <div class="empty">Ładowanie listy faktur...</div>
+</div>
+
+<div style="display:flex;justify-content:center;gap:1rem;">
+    <button id="generateXmlBtn" type="button">🎯 Zakończ Tour i Generuj XML</button>
+    <button id="fullTourBtn" type="button">🪄 Cały Tour</button>
+</div>
 
 <script>
 const BACKEND_URL = "/Fakturownica/api/";
@@ -67,152 +210,135 @@ const statusText = document.getElementById("status-text");
 const tourBox = document.getElementById('tour-box');
 const generateXmlBtn = document.getElementById('generateXmlBtn');
 const progressFill = document.getElementById('progressFill');
+const mati = document.getElementById("mati");
+const gif = document.getElementById("gif");
 
 let queueFiles = [];
 let jobId = null;
 let pollInterval = null;
 
-// Drag & drop
-["dragenter","dragover"].forEach(evt =>
-  dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.add("dragover"); })
-);
-["dragleave","drop"].forEach(evt =>
-  dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropArea.classList.remove("dragover"); })
-);
-dropArea.addEventListener("drop", (e) => {
-  const files = e.dataTransfer?.files;
-  if (files) handleFiles({ target: { files } });
+// === DRAG&DROP ===
+["dragenter","dragover"].forEach(evt=>{
+  dropArea.addEventListener(evt,e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.add("dragover");
+  });
 });
-dropArea.addEventListener("click", () => fileElem.click());
-fileElem.addEventListener("change", handleFiles);
+["dragleave","drop"].forEach(evt=>{
+  dropArea.addEventListener(evt,e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.remove("dragover");
+  });
+});
+dropArea.addEventListener("drop",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  const files = e.dataTransfer.files;
+  handleFiles({target:{files}});
+});
+dropArea.addEventListener("click",()=>fileElem.click());
+fileElem.addEventListener("change",handleFiles);
 
 function handleFiles(e){
-  const files = Array.from(e.target.files || []);
+  const files = Array.from(e.target.files||[]);
+  if(!files.length) return;
   for(let f of files){
     if(f.type!=='application/pdf'){
-      fileNameDisplay.textContent = "❌ Wszystkie pliki muszą być PDF!";
+      fileNameDisplay.textContent="❌ Wszystkie pliki muszą być PDF!";
       return;
     }
     queueFiles.push(f);
   }
-  fileNameDisplay.textContent = `📄 Wybrano ${queueFiles.length} plik(ów)`;
+  fileNameDisplay.textContent=`📄 Wybrano ${queueFiles.length} plik(ów)`;
   uploadBtn.disabled = queueFiles.length===0;
 }
 
-// --- wysyłka plików ---
-uploadBtn.addEventListener("click", async () => {
+uploadBtn.addEventListener("click", async ()=>{
   if(queueFiles.length===0) return;
-  uploadBtn.disabled = true;
-  statusText.textContent = "⏳ Rozpoczynam wysyłkę…";
-
-  const formData = new FormData();
-  queueFiles.forEach(f => formData.append("files", f));
-
-  try {
-    const res = await fetch(`${BACKEND_URL}upload`, { method: "POST", body: formData });
+  mati.style.left = '-500px';
+  mati.style.opacity = '0';
+  const dropRect = dropArea.getBoundingClientRect();
+  const maxWidth = dropRect.left - 20;
+  gif.style.width = Math.min(400, maxWidth)+'px';
+  setTimeout(()=>{ gif.style.bottom = (window.innerHeight - gif.offsetHeight*1.2)+'px'; }, 500);
+  uploadBtn.disabled=true;
+  statusText.textContent="⏳ Rozpoczynam wysyłkę…";
+  const formData=new FormData();
+  queueFiles.forEach(f=>formData.append("files",f));
+  try{
+    const res = await fetch(`${BACKEND_URL}upload`,{method:"POST",body:formData});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     jobId = data.jobId;
-    statusText.textContent = `✅ Wysłano, ID zadania: ${jobId}`;
+    statusText.textContent=`✅ Wysłano, ID zadania: ${jobId}`;
     queueFiles = [];
     fileElem.value = "";
     fileNameDisplay.textContent = "";
-
-    // start pollowania statusu
-    completedCount = 0;
-    pollInterval = setInterval(fetchJobStatus, 1000);
-  } catch(err){
-    statusText.textContent = `❌ Błąd: ${err.message}`;
-    uploadBtn.disabled = false;
-  }
+    progressFill.style.width="0%";
+    pollInterval=setInterval(fetchJobStatus,1000);
+  }catch(err){ statusText.textContent=`❌ Błąd: ${err.message}`; uploadBtn.disabled=false; }
 });
 
-// --- pollowanie statusu z backendu ---
-let completedCount = 0;
+let completedCount=0;
 async function fetchJobStatus(){
   if(!jobId) return;
-  try {
+  try{
     const res = await fetch(`${BACKEND_URL}job-status/${jobId}`);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    completedCount = data.completed;
+    completedCount=data.completed;
     const pct = data.total ? Math.round((completedCount/data.total)*100) : 0;
-    progressFill.style.width = `${pct}%`;
-    statusText.textContent = `Przetworzono ${completedCount} z ${data.total} plików (${pct}%)`;
-
-    if(completedCount >= data.total){
-      clearInterval(pollInterval);
-      pollInterval = null;
-      statusText.textContent += " ✅ Wszystkie pliki przetworzone!";
+    progressFill.style.width=`${pct}%`;
+    statusText.textContent=`Przetworzono ${completedCount} z ${data.total} plików (${pct}%)`;
+    if(completedCount>=data.total){
+      clearInterval(pollInterval); pollInterval=null;
+      statusText.textContent+=" ✅ Wszystkie pliki przetworzone!";
+      setTimeout(()=>{ gif.style.bottom = window.innerHeight+'px'; }, 1000);
     }
-  } catch(err){
-    console.error('Błąd fetchJobStatus:', err);
-  }
+  }catch(err){ console.error(err);}
 }
 
-// --- On Tour: fetch faktury co 5s ---
-async function fetchFaktury() {
-  try {
+async function fetchFaktury(){
+  try{
     const res = await fetch(`${BACKEND_URL}faktury`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
-    if (!data.length) {
-      tourBox.innerHTML = '<div class="empty">Brak faktur w bazie.</div>';
-      return;
-    }
-    tourBox.innerHTML = data.map(f => {
-      const spr = escapeHtml(f.sprzedawca || '');
-      const nab = escapeHtml(f.nabywca || '');
-      const brutto = (f.wartosc_brutto !== undefined && f.wartosc_brutto !== null) ? Number(f.wartosc_brutto).toFixed(2) : '0.00';
-      const num = escapeHtml(f.numer_faktury || '');
-      return `<div class="f-row">
-        <strong>${spr}</strong>
-        <div>${nab}</div>
-        <div class="num">${brutto} PLN</div>
-      </div>`;
+    if(!data.length){tourBox.innerHTML='<div class="empty">Brak faktur w bazie.</div>';return;}
+    let html = `<div class="f-header"><div style="flex:2">Sprzedawca</div><div style="flex:2">Nabywca</div><div style="flex:1">Wart. brutto</div></div>`;
+    html += data.map(f=>{
+      const spr = escapeHtml(f.sprzedawca||'');
+      const nab = escapeHtml(f.nabywca||'');
+      const brutto = (f.wartosc_brutto!==undefined && f.wartosc_brutto!==null)?Number(f.wartosc_brutto).toFixed(2):'0.00';
+      return `<div class="f-row"><strong>${spr}</strong><div class="nabywca">${nab}</div><div class="num">${brutto} PLN</div></div>`;
     }).join('');
-  } catch (err) {
-    tourBox.innerHTML = `<div class="empty">❌ Błąd: ${escapeHtml(err.message)}</div>`;
-  }
+    tourBox.innerHTML = html;
+  }catch(err){tourBox.innerHTML=`<div class="empty">❌ Błąd: ${escapeHtml(err.message)}</div>`;}
 }
+function escapeHtml(s){ if(!s&&s!==0) return''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-function escapeHtml(s) {
-  if (!s && s !== 0) return '';
-  return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+fetchFaktury(); setInterval(fetchFaktury,5000);
 
-fetchFaktury();
-setInterval(fetchFaktury, 5000);
-
-// --- Generuj XML ---
-generateXmlBtn.addEventListener('click', async () => {
-  if (!confirm('Czy na pewno chcesz wygenerować XML i wyczyścić bazę?')) return;
-  generateXmlBtn.disabled = true;
-  generateXmlBtn.textContent = 'Generowanie XML...';
-  try {
-    const res = await fetch(`${BACKEND_URL}faktury/xml`);
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`HTTP ${res.status} - ${txt}`);
-    }
-    const blob = await res.blob();
-    const filename = res.headers.get('content-disposition')?.match(/filename="?([^"]+)"?/)?.[1] || 'faktury.xml';
+generateXmlBtn.addEventListener('click',async()=>{
+  if(!confirm('Czy na pewno chcesz wygenerować XML i wyczyścić bazę?')) return;
+  generateXmlBtn.disabled=true;
+  generateXmlBtn.textContent='Generowanie XML...';
+  try{
+    const resXml = await fetch(`${BACKEND_URL}faktury/xml`);
+    if(!resXml.ok){const txt=await resXml.text();throw new Error(`HTTP ${resXml.status} - ${txt}`);}
+    const blob = await resXml.blob();
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
+    const a=document.createElement('a');a.href=url;a.download="faktury.xml";document.body.appendChild(a);a.click();a.remove();window.URL.revokeObjectURL(url);
+    setTimeout(fetchFaktury,500);
+  }catch(err){alert('Błąd generowania XML: '+err.message);}
+  finally{generateXmlBtn.disabled=false; generateXmlBtn.textContent='🎯 Zakończ Tour i Generuj XML';}
+});
 
-    setTimeout(fetchFaktury, 500);
-  } catch (err) {
-    alert('Błąd generowania XML: ' + err.message);
-  } finally {
-    generateXmlBtn.disabled = false;
-    generateXmlBtn.textContent = '🎯 Zakończ Tour i Generuj XML';
-  }
+// ✅ Naprawiony przycisk podglądu
+document.getElementById('fullTourBtn').addEventListener('click', ()=>{
+  const win = window.open('podglad.html', 'PodgladBazy', 'width=1000,height=700,scrollbars=yes');
+  if(!win) alert("⚠️ Przeglądarka zablokowała otwarcie okna — zezwól na popupy dla tej strony.");
 });
 </script>
 </body>

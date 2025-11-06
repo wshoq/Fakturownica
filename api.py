@@ -1,14 +1,23 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import sqlite3
 import json
 from datetime import datetime
+import os
 
 app = FastAPI()
 
+# ─────────────────────────────
+# 🔧 Ścieżki
+# ─────────────────────────────
 DB_PATH = "/srv/Fakturownica/faktury.db"
+UPLOADS_DIR = "/srv/Fakturownica/uploads"
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
-# 🔓 CORS
+# ─────────────────────────────
+# 🔓 CORS – dostęp z frontendu
+# ─────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +25,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ─────────────────────────────
+# 📂 Serwowanie plików PDF
+# ─────────────────────────────
+# Dzięki temu pliki będą dostępne pod:
+# http://vps15151.awhost.cloud:3012/uploads/nazwa.pdf
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
+
+# ─────────────────────────────
 # 🟢 Dodawanie faktury
+# ─────────────────────────────
 @app.post("/api/faktura")
 async def add_faktura(request: Request):
     data = await request.json()
@@ -50,7 +69,9 @@ async def add_faktura(request: Request):
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
 
+# ─────────────────────────────
 # 🟣 Pobieranie faktur
+# ─────────────────────────────
 @app.get("/api/faktury")
 async def get_faktury():
     conn = sqlite3.connect(DB_PATH)
@@ -63,12 +84,14 @@ async def get_faktury():
     for row in rows:
         try:
             faktury.append(json.loads(row[0]))
-        except:
-            continue
+        except Exception as e:
+            print("❌ Błąd JSON:", e)
     return faktury
 
 
+# ─────────────────────────────
 # 🟡 Aktualizacja pola w json_data
+# ─────────────────────────────
 @app.patch("/api/faktura/update")
 async def update_faktura(request: Request):
     payload = await request.json()
@@ -83,21 +106,19 @@ async def update_faktura(request: Request):
     cursor = conn.cursor()
     cursor.execute("SELECT id, json_data FROM faktury WHERE numer_faktury=?", (numer_faktury,))
     row = cursor.fetchone()
+
     if not row:
         conn.close()
         return {"error": "Nie znaleziono faktury"}
 
     fid, json_str = row
     data = json.loads(json_str)
-
-    # aktualizacja wg ścieżki (np. "daty.data_wystawienia")
     keys = field_path.split(".")
     ref = data
     for k in keys[:-1]:
         ref = ref.get(k, {})
     ref[keys[-1]] = new_value
 
-    # aktualizuj sumaryczne kolumny jeśli dotyczy
     cursor.execute("""
         UPDATE faktury
         SET json_data=?, data_wystawienia=?, termin_platnosci=?, waluta=?, suma_netto=?, suma_vat=?, suma_brutto=?
@@ -115,3 +136,16 @@ async def update_faktura(request: Request):
     conn.commit()
     conn.close()
     return {"status": "updated", "field": field_path, "value": new_value}
+
+
+# ─────────────────────────────
+# 🧩 Debug – sprawdzenie plików w katalogu
+# ─────────────────────────────
+@app.get("/api/debug/files")
+async def list_files():
+    """Pomocniczy endpoint do sprawdzenia zawartości katalogu /uploads"""
+    try:
+        files = os.listdir(UPLOADS_DIR)
+        return {"uploads_dir": UPLOADS_DIR, "files": files}
+    except Exception as e:
+        return {"error": str(e)}

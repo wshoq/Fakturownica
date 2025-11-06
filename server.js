@@ -18,10 +18,12 @@ app.use(express.json());
 
 const DB_PATH = "/srv/Fakturownica/faktury.db";
 const EXPORT_DIR = "/srv/Fakturownica/exports";
+const UPLOADS_DIR = path.join(__dirname,'uploads');
 const OCR_DIR = path.join(__dirname,'OCRjpeg');
 
 if(!fs.existsSync(EXPORT_DIR)) fs.mkdirSync(EXPORT_DIR,{recursive:true});
 if(!fs.existsSync(OCR_DIR)) fs.mkdirSync(OCR_DIR,{recursive:true});
+if(!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR,{recursive:true});
 
 const webhookUrl = 'https://vps15151.awhost.cloud/webhook/fakturownica';
 const axiosInstance = axios.create({ 
@@ -33,7 +35,6 @@ const axiosInstance = axios.create({
 // ---- Kolejka zadań ----
 const jobs = {};
 
-// konwersja PDF -> JPG i wysyłka do webhooka
 async function convertAndSend(pdfPath, originalName, jobId){
   const baseName = `${Date.now()}-${originalName.replace(/\.pdf$/i,'')}`;
   const outputPath = path.join(OCR_DIR, baseName);
@@ -50,20 +51,25 @@ async function convertAndSend(pdfPath, originalName, jobId){
       files.forEach(f=>formData.append('file', fs.createReadStream(path.join(OCR_DIR,f))));
 
       try{
-        // czekamy na webhook, zanim oznaczymy completed
+        // Wysyłamy do n8n
         await axiosInstance.post(webhookUrl, formData, { headers: formData.getHeaders() });
 
-        // oznacz plik jako przetworzony
+        // zaznacz plik jako przetworzony
         const job = jobs[jobId];
         if(job){
           job.completed++;
           job.queue.shift();
         }
 
-        // usuń PDF
+        // usuń pliki lokalne PDF i JPG
         fs.unlink(pdfPath,()=>{});
-        // usuń JPG
         files.forEach(f=>fs.unlink(path.join(OCR_DIR,f),()=>{}));
+
+        // jeśli koniec kolejki, sprzątamy foldery
+        if(job && job.queue.length===0){
+          clearFolder(UPLOADS_DIR);
+          clearFolder(OCR_DIR);
+        }
 
         resolve();
       }catch(e){
@@ -74,7 +80,6 @@ async function convertAndSend(pdfPath, originalName, jobId){
   });
 }
 
-// ---- kolejka zadań ----
 function startJobQueue(jobId){
   const job = jobs[jobId];
   if(!job || job.processing) return;
@@ -96,6 +101,16 @@ function startJobQueue(jobId){
   next();
 }
 
+// ---- Czyszczenie folderów ----
+function clearFolder(folder){
+  fs.readdir(folder,(err,files)=>{
+    if(err) return;
+    files.forEach(f=>{
+      fs.unlink(path.join(folder,f),()=>{});
+    });
+  });
+}
+
 // ---- API ----
 app.post('/api/upload', upload.array('files'), (req,res)=>{
   if(!req.files || req.files.length===0) return res.status(400).json({error:'Brak plików'});
@@ -111,7 +126,7 @@ app.get('/api/job-status/:jobId', (req,res)=>{
   res.json({ total:job.total, completed:job.completed });
 });
 
-// ---- faktury ----
+// ---- Faktury ----
 function readAllFactures(){ 
   return new Promise((resolve,reject)=>{
     const db=new sqlite3.Database(DB_PATH,sqlite3.OPEN_READONLY,(err)=>{ if(err) return reject(err); });
@@ -136,7 +151,7 @@ app.get('/api/faktury', async(req,res)=>{
   }catch(e){console.error(e);res.status(500).json({error:'Błąd odczytu faktur'});}
 });
 
-// XML export
+// ---- XML export (całe rekordy) ----
 app.get('/api/faktury/xml', async(req,res)=>{
   try{
     const rows = await readAllFactures();
@@ -145,15 +160,21 @@ app.get('/api/faktury/xml', async(req,res)=>{
     rows.forEach(r=>{
       let parsed={}; try{parsed=JSON.parse(r.json_data);}catch{}
       xml+=`  <Faktura id="${r.id}">\n`;
-      xml+=`    <Sprzedawca>${escapeXml(parsed?.sprzedawca?.nazwa)}</Sprzedawca>\n`;
-      xml+=`    <Nabywca>${escapeXml(parsed?.nabywca?.nazwa)}</Nabywca>\n`;
-      xml+=`    <Brutto>${parsed?.suma_brutto ?? 0}</Brutto>\n`;
+      for(const [key,val] of Object.entries(parsed)){
+        if(typeof val === 'object'){
+          xml+=`    <${key}>${escapeXml(JSON.stringify(val))}</${key}>\n`;
+        }else{
+          xml+=`    <${key}>${escapeXml(val)}</${key}>\n`;
+        }
+      }
       xml+=`  </Faktura>\n`;
     });
     xml+='</Faktury>\n';
+
     const fname=`faktury_export_${Date.now()}.xml`;
     const filePath=path.join(EXPORT_DIR,fname);
     fs.writeFileSync(filePath,xml,'utf8');
+
     res.download(filePath,fname,(err)=>{
       if(!err){
         const db=new sqlite3.Database(DB_PATH);
